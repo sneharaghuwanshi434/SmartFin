@@ -4,14 +4,18 @@ package com.smartfin.smartfin.service;
 import com.smartfin.smartfin.dto.TransactionResponse;
 import com.smartfin.smartfin.entity.Transaction;
 import com.smartfin.smartfin.entity.User;
+import com.smartfin.smartfin.repository.LedgerEntryRepository;
 import com.smartfin.smartfin.repository.TransactionRepository;
 import com.smartfin.smartfin.repository.UserRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +37,9 @@ class TransactionServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private LedgerEntryRepository ledgerEntryRepository;
+
     @InjectMocks
     private TransactionService transactionService;
 
@@ -42,7 +49,7 @@ class TransactionServiceTest {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> transactionService.getUserTransactions(
-                        "test@gmail.com", -1, 5)
+                        "test@gmail.com", -1, 5, null)
         );
 
         assertEquals(
@@ -53,14 +60,13 @@ class TransactionServiceTest {
         verifyNoInteractions(userRepository, transactionRepository);
     }
 
-
     @Test
     void shouldRejectZeroPageSize() {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> transactionService.getUserTransactions(
-                        "test@gmail.com", 0, 0)
+                        "test@gmail.com", 0, 0, null)
         );
 
         assertEquals(
@@ -77,7 +83,7 @@ class TransactionServiceTest {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> transactionService.getUserTransactions(
-                        "test@gmail.com", 0, 51)
+                        "test@gmail.com", 0, 51, null)
         );
 
         assertEquals(
@@ -92,12 +98,12 @@ class TransactionServiceTest {
     void shouldThrowExceptionWhenUserNotFound() {
 
         when(userRepository.findByEmail("wrong@gmail.com"))
-                .thenReturn(java.util.Optional.empty());
+                .thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> transactionService.getUserTransactions(
-                        "wrong@gmail.com", 0, 5)
+                        "wrong@gmail.com", 0, 5, null)
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -134,28 +140,38 @@ class TransactionServiceTest {
 
         Page<TransactionResponse> result =
                 transactionService.getUserTransactions(
-                        "test@gmail.com", 0, 5);
+                        "test@gmail.com", 0, 5, null);
 
         assertEquals(1, result.getTotalElements());
-        assertEquals("TXN-1001",
-                result.getContent().get(0).getReferenceNumber());
-        assertEquals("DEPOSIT",
-                result.getContent().get(0).getTransactionType());
-        assertEquals("SUCCESS",
-                result.getContent().get(0).getStatus());
+
+        assertEquals(
+                "TXN-1001",
+                result.getContent().get(0).getReferenceNumber()
+        );
+
+        assertEquals(
+                "DEPOSIT",
+                result.getContent().get(0).getTransactionType()
+        );
+
+        assertEquals(
+                "SUCCESS",
+                result.getContent().get(0).getStatus()
+        );
 
         verify(userRepository).findByEmail("test@gmail.com");
+
         verify(transactionRepository)
                 .findAllByInitiatedByOrderByCreatedAtDesc(
                         eq(userId), any(Pageable.class));
     }
-
 
     @Test
     void shouldUseCorrectPaginationAndSorting() {
 
         User user = new User();
         UUID userId = UUID.randomUUID();
+
         ReflectionTestUtils.setField(user, "id", userId);
 
         when(userRepository.findByEmail("test@gmail.com"))
@@ -167,19 +183,24 @@ class TransactionServiceTest {
                 .thenReturn(Page.empty());
 
         transactionService.getUserTransactions(
-                "test@gmail.com", 2, 10);
+                "test@gmail.com", 2, 10, null);
 
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(transactionRepository).findAllByInitiatedByOrderByCreatedAtDesc(
-                eq(userId), captor.capture());
+        verify(transactionRepository)
+                .findAllByInitiatedByOrderByCreatedAtDesc(
+                        eq(userId), captor.capture());
 
         Pageable pageable = captor.getValue();
 
         assertEquals(2, pageable.getPageNumber());
         assertEquals(10, pageable.getPageSize());
-        assertTrue(pageable.getSort().getOrderFor("createdAt").isDescending());
-    }
 
+        assertTrue(
+                pageable.getSort()
+                        .getOrderFor("createdAt")
+                        .isDescending()
+        );
+    }
 }
