@@ -155,6 +155,39 @@ Frontend runs at:
 | Transaction Analytics | `/api/transactions/analytics` | GET |
 | PDF Receipt | `/api/transactions/{referenceNumber}/receipt` | GET |
 
+
+## Application Screenshots
+
+### Login & Registration
+
+![Login Page](screenshots/login.png)
+
+![Registration Page](screenshots/register.png)
+
+### Dashboard
+
+![Dashboard 1](screenshots/dashboard-1.png)
+
+![Dashboard 2](screenshots/dashboard-2.png)
+
+![Dashboard 3](screenshots/dashboard-3.png)
+
+![Dashboard 4](screenshots/dashboard-4.png)
+
+### My Accounts
+
+![Accounts 1](screenshots/accounts-1.png)
+
+![Accounts 2](screenshots/accounts-2.png)
+
+### Fund Transfers
+
+![Fund Transfer](screenshots/transfers.png)
+
+### Transaction History
+
+![Transactions](screenshots/transactions.png)
+
 ## Author
 
 **Sneha Raghuwanshi**
