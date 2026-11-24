@@ -1,6 +1,6 @@
 
 # Build React frontend
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 
 WORKDIR /app
 
