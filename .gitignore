@@ -1,0 +1,23 @@
+# IDE
+.idea/
+.vscode/
+
+# Node
+node_modules/
+**/node_modules/
+**/dist/
+**/.vite/
+
+# Java
+**/target/
+**/build/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Logs and OS
+*.log
+.DS_Store
+Thumbs.db
